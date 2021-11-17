@@ -4,6 +4,7 @@ import android.bluetooth.le.ScanCallback;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -27,8 +28,8 @@ public class AddListActivity extends AppCompatActivity {
 
         list = (ListView)findViewById(R.id.list);
 
-        List<String> data = new ArrayList<>();
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, data);
+        // List<String> data = new ArrayList<>();
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, MyApplication.data);
         list.setAdapter(adapter);
 
         txtInput = (EditText) findViewById(R.id.add_list_text);
@@ -38,8 +39,18 @@ public class AddListActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String newItem = txtInput.getText().toString();
-                data.add(newItem);
+                MyApplication.data.add(newItem);
                 adapter.notifyDataSetChanged();
+            }
+        });
+
+        // 길게 눌러 삭제
+        list.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                MyApplication.data.remove(position);//where arg2 is position of item you click
+                adapter.notifyDataSetChanged();
+                return true;
             }
         });
 
