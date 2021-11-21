@@ -94,7 +94,7 @@ public class ResultActivity extends AppCompatActivity {
             yesorno.setText("알러지 성분이 검출되었습니다.");
             result_color.setBackgroundColor(Color.parseColor("#F07470"));
         }
-        //textResult.setText(data.get(0));
+        textResult.setText(data.get(0));
 
         sTess = new TessBaseAPI();
         test = (ImageView) findViewById((R.id.scan_test));
@@ -105,7 +105,7 @@ public class ResultActivity extends AppCompatActivity {
         if(checkFile(new File(datapath+"/tessdata"))) {
             sTess.init(datapath, lang);
         };
-        //processImage((Bitmap)myIntent.getParcelableExtra("Captured"));
+        processImage((Bitmap)myIntent.getParcelableExtra("Captured"));
     }
 
     boolean checkFile(File dir)
@@ -155,13 +155,6 @@ public class ResultActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
-    /*
-    public String ocr(){
-        OCRresult = sTess.getUTF8Text();
-        return OCRresult;
-    }
-     */
-    /*
     public void processImage(Bitmap bitmap){
         String OCRresult = "";
         sTess.setImage(bitmap);
@@ -172,5 +165,4 @@ public class ResultActivity extends AppCompatActivity {
             textResult.setText("문자가 인식 되지 않았습니다. 다시 촬영해 주세요.");
         }
     }
-     */
 }
