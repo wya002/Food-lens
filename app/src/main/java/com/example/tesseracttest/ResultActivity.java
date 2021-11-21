@@ -1,163 +1,101 @@
 package com.example.tesseracttest;
 
+import android.Manifest;
 import android.content.Intent;
-import android.content.res.AssetManager;
-//import android.graphics.Bitmap;
-import android.graphics.Color;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Parcelable;
+import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
-import com.googlecode.tesseract.android.TessBaseAPI;
-
-import org.w3c.dom.Text;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ResultActivity extends AppCompatActivity {
+import static com.example.tesseracttest.ResultActivity.sTess;
 
-    private Button page_back;
-    private String datapath = "";
-    private String lang = "";
-    private ImageView test;
-    private String yesorno = "";
-    private View result_color;
+public class ScanActivity extends AppCompatActivity {
 
-    static TessBaseAPI sTess;
+    private Button scan_camera, scan_next;
+    private ImageView selectedImage;
+    private TextView myTest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_result);
+        setContentView(R.layout.activity_scan);
 
-        page_back = (Button)findViewById(R.id.scan_next);
-        page_back.setOnClickListener(new View.OnClickListener() {
+        selectedImage = findViewById(R.id.scan_image); // 찍힌 사진 이미
+        scan_camera = (Button) findViewById(R.id.scan_camera);
+        scan_camera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(ResultActivity.this, MainActivity.class);
-                startActivityForResult(intent, 1001);
+                askCameraPermissions();
             }
         });
-        TextView textResult = (TextView) findViewById(R.id.ocr_Result);
-        TextView yesorno = (TextView) findViewById(R.id.ocr_Show);
-        View result_color = (View) findViewById(R.id.result_color);
-        Intent myIntent = getIntent();
-        //test = (ImageView) findViewById(R.id.scan_test);
-        //test.setImageBitmap((Bitmap)myIntent.getParcelableExtra("Captured"));
-        ArrayList<String> data = (ArrayList<String>) myIntent.getSerializableExtra("List");
-        ArrayList<String> show_res = new ArrayList<>();
-            if(data.contains("설탕")){
-                show_res.add("설탕");
+        Intent myIntent2 = getIntent();
+        scan_next = (Button) findViewById(R.id.scan_next);
+        scan_next.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ScanActivity.this, ResultActivity.class);
+                //Drawable d = selectedImage.getDrawable();
+                //Bitmap bitmap = ((BitmapDrawable)d).getBitmap();
+                //intent.putExtra("Captured", bitmap);
+                ArrayList<String> data = (ArrayList<String>) myIntent2.getSerializableExtra("list");
+                intent.putExtra("List", data);
+                setResult(RESULT_OK, intent);
+                startActivityForResult(intent,1002);
             }
-            if(data.contains("복숭아")){
-                show_res.add("복숭아");
-            }
-            if(data.contains("홍차")){
-                show_res.add("홍차");
-            }
-        for(int j = 0; j < show_res.size(); j++) {
-            textResult.append(show_res.get(j));
-            if(j < show_res.size()-1){
-                textResult.append(", ");
-            }
-        }
-        if(show_res.size() == 0){
-            yesorno.setText("알러지 성분이 검출되지 않았습니다!");
-            textResult.append("없음");
-            result_color.setBackgroundColor(Color.parseColor("#BBF070"));
-        }
-        if(show_res.size() > 0){
-            yesorno.setText("알러지 성분이 검출되었습니다.");
-            result_color.setBackgroundColor(Color.parseColor("#F07470"));
-        }
-        //textResult.setText(data.get(0));
+        });
 
-        sTess = new TessBaseAPI();
-        test = (ImageView) findViewById((R.id.scan_test));
-        // Tesseract 인식 언어를 한국어로 설정 및 초기화
-                lang = "kor";
-        datapath = getFilesDir()+ "/tesseract/";
-
-        if(checkFile(new File(datapath+"/tessdata"))) {
-            sTess.init(datapath, lang);
-        };
-        //processImage((Bitmap)myIntent.getParcelableExtra("Captured"));
+        myTest = (TextView) findViewById(R.id.scan_text_3);
     }
 
-    boolean checkFile(File dir)
-    {
-        //디렉토리가 없으면 디렉토리를 만들고 그후에 파일을 카피
-        if(!dir.exists() && dir.mkdirs()) {
-            copyFiles();
+    private void askCameraPermissions() {
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)!= PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.CAMERA}, 101);
+        }else{
+            openCamera();
         }
-        //디렉토리가 있지만 파일이 없으면 파일카피 진행
-        if(dir.exists()) {
-            String datafilepath = datapath + "/tessdata/" + lang + ".traineddata";
-            File datafile = new File(datafilepath);
-            if(!datafile.exists()) {
-                copyFiles();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 101) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                openCamera();
+            } else {
+
+
             }
         }
-        return true;
     }
 
-    void copyFiles()
-    {
-        AssetManager assetMgr = this.getAssets();
+    private void openCamera(){
+        Intent camera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        startActivityForResult(camera, 102);
+    }
 
-        InputStream is = null;
-        OutputStream os = null;
 
-        try {
-            is = assetMgr.open("tessdata/"+lang+".traineddata");
-
-            String destFile = datapath + "/tessdata/" + lang + ".traineddata";
-
-            os = new FileOutputStream(destFile);
-
-            byte[] buffer = new byte[1024];
-            int read;
-            while ((read = is.read(buffer)) != -1) {
-                os.write(buffer, 0, read);
-            }
-            is.close();
-            os.flush();
-            os.close();
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-
-        } catch (IOException e) {
-            e.printStackTrace();
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 102) {
+            Bitmap image = (Bitmap) data.getExtras().get("data");
+            selectedImage.setImageBitmap(image);
         }
     }
-    /*
-    public String ocr(){
-        OCRresult = sTess.getUTF8Text();
-        return OCRresult;
-    }
-     */
-    /*
-    public void processImage(Bitmap bitmap){
-        String OCRresult = "";
-        sTess.setImage(bitmap);
-        OCRresult = sTess.getUTF8Text();
-        TextView textResult = (TextView) findViewById(R.id.ocr_Result);
-        textResult.setText(OCRresult);
-        if(OCRresult == ""){
-            textResult.setText("문자가 인식 되지 않았습니다. 다시 촬영해 주세요.");
-        }
-    }
-     */
 }
