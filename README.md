@@ -16,6 +16,15 @@
   * 원재료를 다 읽지 않아도 피해야하는 음식의 포함여부를 정확히 알 수 있어 시간이 절약됨
   * 식품 알레르기에 민감하여 식사가 힘든 사용자가 안심하고 즐길 수 있는 식사시간 제공
 -------
+## 실행 화면
+![image](https://user-images.githubusercontent.com/75249093/157695544-f69d4897-83ed-48fe-aadb-269c995965af.png)
+![image](https://user-images.githubusercontent.com/75249093/157695647-856b83e0-0aa4-4afd-a042-08f658b84a63.png)
+![image](https://user-images.githubusercontent.com/75249093/157695699-59e24abb-a1b8-4b86-8cc5-a0c9a08c51e7.png)
+![image](https://user-images.githubusercontent.com/75249093/157695713-cc421d22-7d9b-4b77-a846-d054fd32fd28.png)
+-------
+## 시스템 아키텍처
+![image](https://user-images.githubusercontent.com/75249093/157696379-c80d7db5-4b6a-439f-a4e2-deb388e954f6.png)
+-------
 ## 적용 기술
   * 텍스트 인식 기술(OCR : Optical character Recognition)
 ## 활용 오픈소스
